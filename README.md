@@ -21,13 +21,7 @@ make -j$(nproc)
 ```
 
 Run (required root)
-1. Create the log directory and make it writable by the running user:
-
-```bash
-sudo mkdir -p /var/log/matt_daemon
-sudo chown $USER: /var/log/matt_daemon
-```
-2. Run the daemon as root:
+1. Run the daemon as root:
 
 ```bash
 sudo ./build/Matt_daemon
