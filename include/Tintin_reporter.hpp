@@ -13,7 +13,7 @@ enum class LogType : uint8_t {
 
 class Tintin_reporter {
     private:
-        std::ofstream _logFile;
+        std::ofstream _log_file;
         std::unordered_map<LogType, std::string_view> _reporters;    
 
         Tintin_reporter();

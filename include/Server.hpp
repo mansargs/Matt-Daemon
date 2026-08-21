@@ -32,7 +32,7 @@ class Server {
         void processClientMessages(Client& client);
     
         void removeClient(std::size_t index);
-    
+        bool start();
     public:
         Server();
         ~Server();
@@ -40,6 +40,6 @@ class Server {
         Server(const Server&) = delete;
         Server& operator=(const Server&) = delete;
     
-        bool start();
-        void run();
+
+        bool run();
 };

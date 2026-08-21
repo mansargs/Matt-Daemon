@@ -6,7 +6,7 @@
 Client::Client(int fd) : _fd(fd) {}
 
 Client::~Client() {
-    if (_fd != 0)
+    if (_fd >= 0)
         close(_fd);
 }
 
@@ -23,6 +23,8 @@ std::optional<std::string> Client::getMessage() {
     if (pos == std::string::npos)
         return std::nullopt;
     std::string msg = _buffer.substr(0, pos);
+    if (msg.empty())
+        return std::nullopt;
     _buffer.erase(0, pos + 1);
     return std::optional<std::string>(msg);
 }

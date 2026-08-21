@@ -8,8 +8,7 @@
 #include <sys/stat.h>
 
 const char* Daemon::LOCK_PATH = "/var/lock/matt_daemon.lock";
-volatile sig_atomic_t Daemon::_running = 0;
-volatile sig_atomic_t Daemon::_signal = 0;
+bool Daemon::_running = false;
 
 Daemon::Daemon() : _lockFd(-1) {}
 
@@ -47,10 +46,9 @@ bool Daemon::redirectStandardFiles() {
     int fd = open("/dev/null", O_RDWR);
     if (fd < 0)
         return false;
-    if (dup2(fd, STDIN_FILENO) == -1 || dup2(fd, STDOUT_FILENO)
-        || dup2(fd, STDERR_FILENO)) {
-            if (fd > STDERR_FILENO)
-                close(fd);
+    if (dup2(fd, STDIN_FILENO) == -1 || dup2(fd, STDOUT_FILENO) == -1 || dup2(fd, STDERR_FILENO) == -1) {
+        if (fd > STDERR_FILENO)
+            close(fd);
         return false;
     }
     if (fd > STDERR_FILENO)
@@ -69,15 +67,9 @@ bool Daemon::createFork() {
     return true;
 }
 
-void Daemon::stop() {
-    _running = 0;
-}
-
 bool Daemon::start() {
     Tintin_reporter& logger = Tintin_reporter::getInstance();
     logger.log(LogType::Info, "Entering daemon mode.");
-    if (!createLock())
-        return false;
     if (!createFork())
         return false;
     if (!createSession())
@@ -91,9 +83,9 @@ bool Daemon::start() {
     umask(0);
     if (!redirectStandardFiles())
         return false;
-    if (!setupSignals())
+    if (!_signals.setupSignals())
         return false;
-    _running = 1;
+    _running = true;
    logger.log(
         LogType::Info,
         "Matt_daemon: started. PID: " +
@@ -102,28 +94,10 @@ bool Daemon::start() {
     return true; 
 }
 
-void Daemon::signalHandler(int signal) {
-    _signal = signal;
-    _running = 0;
-}
-
 bool Daemon::isRunning() {
-    return _running == 1;
+    return _running == true;
 }
 
-bool Daemon::setupSignals() {
-    struct sigaction sa{};
-
-    sa.sa_handler = Daemon::signalHandler;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
-    if (sigaction(SIGTERM, &sa, nullptr) == -1)
-        return false;
-    if (sigaction(SIGINT, &sa, nullptr) == -1)
-        return false;
-    if (sigaction(SIGHUP, &sa, nullptr) == -1)
-        return false;
-    if (sigaction(SIGQUIT, &sa, nullptr) == -1)
-        return false;
-    return true;
+void Daemon::stop() {
+    _running = 0;
 }

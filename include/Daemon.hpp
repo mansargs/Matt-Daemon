@@ -1,29 +1,26 @@
 #pragma once
 
-#include <csignal>
+#include "SignalHandler.hpp"
 
 class Daemon {
     private:
         static const char* LOCK_PATH;
+        int  _lockFd;
+        static bool _running;
+        SignalHandler _signals;
 
-        int  _lockFd;  
-        static volatile sig_atomic_t _running;
-        static volatile sig_atomic_t _signal;
-
-        bool createLock();
+       
         bool createFork();
         bool createSession();
         bool redirectStandardFiles();
-        int daemonize();
-        bool setupSignals();
-
-        static void signalHandler(int signal);
+        int  daemonize();
     public:
         Daemon();
         ~Daemon();
 
         bool start();
-        static void stop();
+        bool createLock();
 
+        static void stop();
         static bool isRunning();
 };

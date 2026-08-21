@@ -15,6 +15,7 @@ add_executable(Matt_daemon
     src/Client.cpp
     src/Daemon.cpp
     src/Server.cpp
+    src/SignalHandler.cpp
 )
 
 target_include_directories(Matt_daemon PRIVATE
